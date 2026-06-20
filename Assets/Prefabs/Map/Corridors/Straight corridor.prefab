@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1460546644111203591}
   m_Layer: 0
-  m_Name: Connector point
+  m_Name: Connection point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -24,12 +24,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 115866798890661154}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: -8}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2505915682872714667}
+  m_Father: {fileID: 3581721401642529365}
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!1 &1496817280209017951
 GameObject:
@@ -60,7 +60,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1460546644111203591}
+  - {fileID: 1588809375729440122}
   m_Father: {fileID: 3581721401642529365}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4660346482743294769
@@ -73,7 +73,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1588809375729440122}
   m_Layer: 0
-  m_Name: Connection point
+  m_Name: Connector point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -92,7 +92,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 3581721401642529365}
+  m_Father: {fileID: 2505915682872714667}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4678524983878137453
 GameObject:
@@ -336,7 +336,7 @@ Transform:
   - {fileID: 5755143036795433005}
   - {fileID: 6391791431300177573}
   - {fileID: 6749966159853906988}
-  - {fileID: 1588809375729440122}
+  - {fileID: 1460546644111203591}
   - {fileID: 2505915682872714667}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

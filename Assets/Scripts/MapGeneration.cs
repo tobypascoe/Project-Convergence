@@ -4,21 +4,25 @@ using UnityEngine;
 
 public class MapGeneration : MonoBehaviour
 {
-    public List<GameObject> corridors;
+    public List<GameObject> corridors;     // DO NOT RUN YET INFINITE LOOP
     public List<GameObject> rooms;
 
+    public GameObject startingCorridor;
+
     private List<GameObject> emptyConnectors = new List<GameObject>();
+
+    private int totalObjects = 0;
 
     bool[,] occupied;
 
     public void Generate()
     {
         occupied = new bool[101, 101];
-        GameObject startCorridor = Instantiate(corridors[0], Vector3.zero, Quaternion.identity);
+        GameObject startCorridor = Instantiate(startingCorridor, Vector3.zero, Quaternion.identity);
         occupied[50, 50] = true;
         emptyConnectors.Add(startCorridor);
 
-        while (emptyConnectors.Count > 0)
+        while (emptyConnectors.Count > 0 && totalObjects < 50)
         {
             GameObject workingObject = emptyConnectors[0];
             emptyConnectors.RemoveAt(0);
@@ -26,39 +30,91 @@ public class MapGeneration : MonoBehaviour
             Transform connectors = workingObject.transform.Find("Connectors");
             if (connectors == null) continue;
 
-            GameObject prefab = corridors[Random.Range(0, corridors.Count)];
-            GameObject newObject = Instantiate(prefab, Vector3.zero, Quaternion.identity);
-
             foreach (Transform connectorPoint in connectors)
             {
-                if (connectorPoint.transform.position.x > 0) // connector point at right of cell
+                bool hasSetupPrefab = false;
+                while (hasSetupPrefab = false)
                 {
-                    float currXpos = workingObject.transform.position.x;
-                    newObject.transform.position = new Vector3(currXpos + 16f, 0f, workingObject.transform.position.z);
-                    newObject.transform.rotation = workingObject.transform.rotation * connectorPoint.transform.rotation;
+                    if (SetupPrefab(connectorPoint, workingObject))
+                    {
+                        hasSetupPrefab = true;
+                    }
                 }
-                else if (connectorPoint.transform.position.x < 0) // connector point at left of cell
-                {
-                    float currXpos = workingObject.transform.position.x;
-                    newObject.transform.position = new Vector3(currXpos - 16f, 0f, workingObject.transform.position.z);
-                    newObject.transform.rotation = workingObject.transform.rotation * connectorPoint.transform.rotation;
-                }
-                else if (connectorPoint.transform.position.z > 0) // connector point at top of cell
-                {
-                    float currZpos = workingObject.transform.position.z;
-                    newObject.transform.position = new Vector3(workingObject.transform.position.x, 0f, currZpos + 16f);
-                    newObject.transform.rotation = workingObject.transform.rotation * connectorPoint.transform.rotation;
-                }
-                else // connector point at bottom of cell
-                {
-                    float currZpos = workingObject.transform.position.z;
-                    newObject.transform.position = new Vector3(workingObject.transform.position.x, 0f, currZpos - 16f);
-                    newObject.transform.rotation = workingObject.transform.rotation * connectorPoint.transform.rotation;
-                }
-
-                emptyConnectors.Add(newObject);
             }
         }
+    }
+
+    private bool SetupPrefab(Transform connectorPoint, GameObject workingObject)
+    {
+
+        GameObject prefab = corridors[Random.Range(0, corridors.Count)];
+        GameObject newObject = Instantiate(prefab, Vector3.zero, Quaternion.identity);
+
+        Quaternion targetRotation = Quaternion.Euler(0, SnapAngle(workingObject.transform.eulerAngles.y + connectorPoint.transform.localEulerAngles.y), 0);
+
+        newObject.transform.rotation = targetRotation;
+        Vector3 location = workingObject.transform.position + connectorPoint.forward * 16f;
+
+        var (xPos, zPos) = GetXZ(location);
+
+        if (occupied[xPos, zPos])
+        {
+            Destroy(newObject);
+            // needs to return something
+        }
+
+        Transform storeDirections = newObject.transform.Find("Store direction");
+
+        if (storeDirections != null)
+        {
+            bool hasSetUpShops = setUpShops(newObject, storeDirections, location);
+            if (hasSetUpShops == false)
+            {
+                Destroy(newObject);
+                return false;
+            }
+        }
+
+        newObject.transform.position = location;
+        occupied[xPos, zPos] = true;
+
+        emptyConnectors.Add(newObject);
+        totalObjects++;
+        return true;        
+    }
+
+    bool setUpShops(GameObject newObject, Transform storeDirections, Vector3 location)
+    {
+        foreach (Transform direction in storeDirections)
+        {
+            Vector3 facing = direction.forward;
+            Vector3 shopLocation = location + facing * 16f;
+            var (xPos, yPos) = GetXZ(location);
+
+            if (!occupied[xPos, yPos])
+            {
+                Instantiate(rooms[Random.Range(0, rooms.Count)], shopLocation, Quaternion.Euler(0, SnapAngle(newObject.transform.eulerAngles.y + 180f), 0));
+                occupied[xPos, yPos] = true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    float SnapAngle(float angle)
+    {
+        return Mathf.Round(angle / 90f) * 90f;
+    }
+
+    private (int x, int z) GetXZ(Vector3 location)
+    {
+        int xPos = Mathf.RoundToInt(location.x / 16) + 50;
+        int zPos = Mathf.RoundToInt(location.z / 16) + 50;
+        return (xPos, zPos);
     }
 
 }
