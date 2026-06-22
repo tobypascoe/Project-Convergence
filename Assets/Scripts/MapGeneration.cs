@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class MapGeneration : MonoBehaviour
 {
-    public List<GameObject> corridors;     // DO NOT RUN YET INFINITE LOOP
+    public List<GameObject> corridors;
+    public List<GameObject> turns;
+    public List<GameObject> junctions;
     public List<GameObject> rooms;
 
     public GameObject startingCorridor;
@@ -13,16 +15,18 @@ public class MapGeneration : MonoBehaviour
 
     private int totalObjects = 0;
 
+    public int halfGridSize = 100;
+
     bool[,] occupied;
 
     public void Generate()
     {
-        occupied = new bool[101, 101];
+        occupied = new bool[(halfGridSize*2) + 1, (halfGridSize * 2) + 1];
         GameObject startCorridor = Instantiate(startingCorridor, Vector3.zero, Quaternion.identity);
-        occupied[50, 50] = true;
+        occupied[halfGridSize, halfGridSize] = true;
         emptyConnectors.Add(startCorridor);
 
-        while (emptyConnectors.Count > 0 && totalObjects < 50)
+        while (emptyConnectors.Count > 0 && totalObjects < 500)
         {
             GameObject workingObject = emptyConnectors[0];
             emptyConnectors.RemoveAt(0);
@@ -32,37 +36,41 @@ public class MapGeneration : MonoBehaviour
 
             foreach (Transform connectorPoint in connectors)
             {
-                bool hasSetupPrefab = false;
-                while (hasSetupPrefab = false)
-                {
-                    if (SetupPrefab(connectorPoint, workingObject))
-                    {
-                        hasSetupPrefab = true;
-                    }
-                }
+                SetupPrefab(connectorPoint, workingObject);
             }
         }
     }
 
-    private bool SetupPrefab(Transform connectorPoint, GameObject workingObject)
+    private void SetupPrefab(Transform connectorPoint, GameObject workingObject)
     {
-
-        GameObject prefab = corridors[Random.Range(0, corridors.Count)];
-        GameObject newObject = Instantiate(prefab, Vector3.zero, Quaternion.identity);
-
-        Quaternion targetRotation = Quaternion.Euler(0, SnapAngle(workingObject.transform.eulerAngles.y + connectorPoint.transform.localEulerAngles.y), 0);
-
-        newObject.transform.rotation = targetRotation;
         Vector3 location = workingObject.transform.position + connectorPoint.forward * 16f;
 
         var (xPos, zPos) = GetXZ(location);
 
         if (occupied[xPos, zPos])
         {
-            Destroy(newObject);
-            // needs to return something
+            return;
         }
 
+        GameObject newObject;
+
+        int randomNum = Random.Range(0, 99);
+
+        if (randomNum < 75) // spawn corridor
+        {
+            newObject = Instantiate(corridors[Random.Range(0, corridors.Count)], Vector3.zero, Quaternion.identity);
+        }
+        else if (randomNum < 92) // spawn turn
+        {
+            newObject = Instantiate(turns[Random.Range(0, turns.Count)], Vector3.zero, Quaternion.identity);
+        }
+        else // spawn junction
+        {
+            newObject = Instantiate(junctions[Random.Range(0, junctions.Count)], Vector3.zero, Quaternion.identity);
+        }
+
+        Quaternion targetRotation = Quaternion.Euler(0, SnapAngle(workingObject.transform.eulerAngles.y + connectorPoint.transform.localEulerAngles.y), 0);
+        newObject.transform.rotation = targetRotation;
         Transform storeDirections = newObject.transform.Find("Store direction");
 
         if (storeDirections != null)
@@ -71,7 +79,8 @@ public class MapGeneration : MonoBehaviour
             if (hasSetUpShops == false)
             {
                 Destroy(newObject);
-                return false;
+                SetupPrefab(connectorPoint, workingObject);
+                return;
             }
         }
 
@@ -79,25 +88,32 @@ public class MapGeneration : MonoBehaviour
         occupied[xPos, zPos] = true;
 
         emptyConnectors.Add(newObject);
-        totalObjects++;
-        return true;        
+        totalObjects++;    
     }
 
     bool setUpShops(GameObject newObject, Transform storeDirections, Vector3 location)
     {
+        List<GameObject> currentShops = new List<GameObject>();
         foreach (Transform direction in storeDirections)
         {
             Vector3 facing = direction.forward;
             Vector3 shopLocation = location + facing * 16f;
-            var (xPos, yPos) = GetXZ(location);
+            var (xPos, yPos) = GetXZ(shopLocation);
 
             if (!occupied[xPos, yPos])
             {
-                Instantiate(rooms[Random.Range(0, rooms.Count)], shopLocation, Quaternion.Euler(0, SnapAngle(newObject.transform.eulerAngles.y + 180f), 0));
+                GameObject newShop = Instantiate(rooms[Random.Range(0, rooms.Count)], shopLocation, Quaternion.identity);
+                Transform shopFrontDirection = newShop.transform.Find("Shop front direction");
+                newShop.transform.rotation = Quaternion.Euler(0, SnapAngle(direction.transform.localEulerAngles.y + shopFrontDirection.transform.localEulerAngles.y), 0);
                 occupied[xPos, yPos] = true;
+                currentShops.Add(newShop);
             }
             else
             {
+                foreach (GameObject shop in currentShops)
+                {
+                    Destroy(shop);
+                }
                 return false;
             }
         }
@@ -112,8 +128,8 @@ public class MapGeneration : MonoBehaviour
 
     private (int x, int z) GetXZ(Vector3 location)
     {
-        int xPos = Mathf.RoundToInt(location.x / 16) + 50;
-        int zPos = Mathf.RoundToInt(location.z / 16) + 50;
+        int xPos = Mathf.RoundToInt(location.x / 16) + halfGridSize;
+        int zPos = Mathf.RoundToInt(location.z / 16) + halfGridSize;
         return (xPos, zPos);
     }
 
