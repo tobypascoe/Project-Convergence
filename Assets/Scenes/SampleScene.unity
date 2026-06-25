@@ -164,7 +164,7 @@ MonoBehaviour:
       Enabled: 1
       Input:
         LegacyInput: Mouse X
-        LegacyGain: 1000
+        LegacyGain: 500
         CancelDeltaTime: 0
       InputValue: 0
       Driver:
@@ -175,7 +175,7 @@ MonoBehaviour:
       Enabled: 1
       Input:
         LegacyInput: Mouse Y
-        LegacyGain: -1000
+        LegacyGain: -500
         CancelDeltaTime: 0
       InputValue: 0
       Driver:
@@ -770,16 +770,19 @@ MonoBehaviour:
   - {fileID: 6514703812377993092, guid: 679b31b9c0aa6bf49b880500b244e5cc, type: 3}
   - {fileID: 1338294538938843290, guid: 044e13897754dd04ea20ff651e64b494, type: 3}
   - {fileID: 3001621601881738302, guid: e14df4fd90715aa4e84f3b90f65d4db4, type: 3}
-  turns:
-  - {fileID: 3691425999700802254, guid: cc1df33092646db44a798ed8d7f48502, type: 3}
+  rightTurns:
   - {fileID: 6803206534176410654, guid: 3b017e52e3c6edb47937f816ac74c4c8, type: 3}
+  leftTurns:
+  - {fileID: 3691425999700802254, guid: cc1df33092646db44a798ed8d7f48502, type: 3}
   junctions:
   - {fileID: 5831732293190411065, guid: dfb081be7432b944799284b676432eac, type: 3}
   rooms:
   - {fileID: 7862460486794084430, guid: 84425bfc055ddb54cacf64dc4c099b89, type: 3}
-  startingCorridor: {fileID: 5831732293190411065, guid: dfb081be7432b944799284b676432eac,
+  startingCorridor: {fileID: 258929603863309219, guid: ee0d97ee11dd2e440a7749aef96acbf0,
     type: 3}
-  halfGridSize: 100
+  deadEndCorridor: {fileID: 4342132896359043399, guid: d3ac1e202fc275d408a7d0f175326445,
+    type: 3}
+  halfGridSize: 400
 --- !u!114 &1433090745
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -5,11 +5,13 @@ using UnityEngine;
 public class MapGeneration : MonoBehaviour
 {
     public List<GameObject> corridors;
-    public List<GameObject> turns;
+    public List<GameObject> rightTurns;
+    public List<GameObject> leftTurns;
     public List<GameObject> junctions;
     public List<GameObject> rooms;
 
     public GameObject startingCorridor;
+    public GameObject deadEndCorridor;
 
     private List<GameObject> emptyConnectors = new List<GameObject>();
 
@@ -26,7 +28,7 @@ public class MapGeneration : MonoBehaviour
         occupied[halfGridSize, halfGridSize] = true;
         emptyConnectors.Add(startCorridor);
 
-        while (emptyConnectors.Count > 0 && totalObjects < 500)
+        while (emptyConnectors.Count > 0 && totalObjects < 5000)
         {
             GameObject workingObject = emptyConnectors[0];
             emptyConnectors.RemoveAt(0);
@@ -52,25 +54,70 @@ public class MapGeneration : MonoBehaviour
             return;
         }
 
-        GameObject newObject;
+        List<Vector3Int> occupiedNeighbours = new List<Vector3Int>();
 
-        int randomNum = Random.Range(0, 99);
+        if (occupied[xPos, zPos + 1]) occupiedNeighbours.Add(new Vector3Int(0, 0, 1));
 
-        if (randomNum < 75) // spawn corridor
-        {
-            newObject = Instantiate(corridors[Random.Range(0, corridors.Count)], Vector3.zero, Quaternion.identity);
-        }
-        else if (randomNum < 92) // spawn turn
-        {
-            newObject = Instantiate(turns[Random.Range(0, turns.Count)], Vector3.zero, Quaternion.identity);
-        }
-        else // spawn junction
-        {
-            newObject = Instantiate(junctions[Random.Range(0, junctions.Count)], Vector3.zero, Quaternion.identity);
-        }
+        if (occupied[xPos, zPos - 1]) occupiedNeighbours.Add(new Vector3Int(0, 0, -1));
+
+        if (occupied[xPos + 1, zPos]) occupiedNeighbours.Add(new Vector3Int(1, 0, 0));
+        
+        if (occupied[xPos - 1, zPos]) occupiedNeighbours.Add(new Vector3Int(-1, 0, 0));
+
+        Vector3 dir = -connectorPoint.forward;
+        Vector3Int conPointNeg = new Vector3Int(Mathf.RoundToInt(dir.x), 0, Mathf.RoundToInt(dir.z));
+        occupiedNeighbours.Remove(conPointNeg);
+        
+
+        bool isValidPrefab = false;
+        GameObject newObject = null;
 
         Quaternion targetRotation = Quaternion.Euler(0, SnapAngle(workingObject.transform.eulerAngles.y + connectorPoint.transform.localEulerAngles.y), 0);
-        newObject.transform.rotation = targetRotation;
+
+        while (!isValidPrefab)
+        {
+            if (newObject != null)
+            {
+                GameObject.Destroy(newObject);
+            }
+
+            if (occupiedNeighbours.Count >= 3)
+            {
+                Debug.Log(string.Join(", ", occupiedNeighbours));
+                Debug.Log("-connectorPoint.forward = " + -connectorPoint.forward);
+                newObject = Instantiate(deadEndCorridor, location, targetRotation);
+                isValidPrefab = true;
+                break;
+            }
+
+            int randomNum = Random.Range(0, 100);
+
+            if (randomNum < 75) // spawn corridor
+            {
+                newObject = Instantiate(corridors[Random.Range(0, corridors.Count)], location, targetRotation);
+                isValidPrefab = isDeadEnd(newObject, occupiedNeighbours);
+            }
+            else if (randomNum < 92) // spawn turn
+            {
+                if (Random.Range(0, 2) == 0)
+                {
+                    newObject = Instantiate(rightTurns[Random.Range(0, rightTurns.Count)], location, targetRotation);
+                    isValidPrefab = isDeadEnd(newObject, occupiedNeighbours);
+                }
+                else
+                {
+                    newObject = Instantiate(leftTurns[Random.Range(0, leftTurns.Count)], location, targetRotation);
+                    isValidPrefab = isDeadEnd(newObject, occupiedNeighbours);
+                }
+            }
+            else // spawn junction
+            {
+                newObject = Instantiate(junctions[Random.Range(0, junctions.Count)], location, targetRotation);
+                isValidPrefab = isDeadEnd(newObject, occupiedNeighbours);
+            }
+        }
+
+
         Transform storeDirections = newObject.transform.Find("Store direction");
 
         if (storeDirections != null)
@@ -84,11 +131,28 @@ public class MapGeneration : MonoBehaviour
             }
         }
 
-        newObject.transform.position = location;
+        
         occupied[xPos, zPos] = true;
 
         emptyConnectors.Add(newObject);
         totalObjects++;    
+    }
+
+    bool isDeadEnd(GameObject newObject, List<Vector3Int> occupiedNeighbours)
+    {
+        Transform connectorPoints = newObject.transform.Find("Connectors");
+        foreach (Transform connector in connectorPoints)
+        {
+            Vector3 dir = connector.forward;
+            Vector3Int gridDir = new Vector3Int(Mathf.RoundToInt(dir.x), 0, Mathf.RoundToInt(dir.z));
+            //Debug.Log("gridDir = " + gridDir);
+
+            if (occupiedNeighbours.Contains(gridDir))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     bool setUpShops(GameObject newObject, Transform storeDirections, Vector3 location)
@@ -104,7 +168,7 @@ public class MapGeneration : MonoBehaviour
             {
                 GameObject newShop = Instantiate(rooms[Random.Range(0, rooms.Count)], shopLocation, Quaternion.identity);
                 Transform shopFrontDirection = newShop.transform.Find("Shop front direction");
-                newShop.transform.rotation = Quaternion.Euler(0, SnapAngle(direction.transform.localEulerAngles.y + shopFrontDirection.transform.localEulerAngles.y), 0);
+                newShop.transform.rotation = Quaternion.Euler(0, SnapAngle(newObject.transform.eulerAngles.y + direction.transform.localEulerAngles.y), 0);
                 occupied[xPos, yPos] = true;
                 currentShops.Add(newShop);
             }
