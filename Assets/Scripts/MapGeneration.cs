@@ -145,7 +145,6 @@ public class MapGeneration : MonoBehaviour
         {
             Vector3 dir = connector.forward;
             Vector3Int gridDir = new Vector3Int(Mathf.RoundToInt(dir.x), 0, Mathf.RoundToInt(dir.z));
-            //Debug.Log("gridDir = " + gridDir);
 
             if (occupiedNeighbours.Contains(gridDir))
             {

@@ -64,7 +64,7 @@ public class PlayerInteraction : MonoBehaviour
             if (itemObject != null)
             {
                 int itemID = item.itemID;
-                playerInventory.addItem(itemID, itemObject);
+                playerInventory.AddItem(itemID, itemObject);
             }
             if (heldObject == null)
             {  
