@@ -15,6 +15,7 @@ public class PlayerInteraction : MonoBehaviour
 
     public GameObject crosshairImageDefault;
     public GameObject crosshairImagePickup;
+    public PlayerInventory playerInventory;
 
     private float heldX;
     private float heldY;
@@ -28,12 +29,21 @@ public class PlayerInteraction : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0));
         RaycastHit hit;
         Rigidbody rb = null;
+        WorldItem item = null;
+        GameObject itemObject = null;
         float radius = 0.05f;
         if (Physics.SphereCast(ray, radius, out hit, pickupRange))
         {
             if (hit.collider.CompareTag("Pickup"))
             {
                 rb = hit.collider.GetComponent<Rigidbody>();
+                crosshairImageDefault.SetActive(false);
+                crosshairImagePickup.SetActive(true);
+            }
+            if (hit.collider.CompareTag("Item"))
+            {
+                item = hit.collider.GetComponent<WorldItem>();
+                itemObject = hit.collider.gameObject;
                 crosshairImageDefault.SetActive(false);
                 crosshairImagePickup.SetActive(true);
             }
@@ -51,8 +61,13 @@ public class PlayerInteraction : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.E))
         {
-            if (heldObject == null)
+            if (itemObject != null)
             {
+                int itemID = item.itemID;
+                playerInventory.addItem(itemID, itemObject);
+            }
+            if (heldObject == null)
+            {  
                 if (rb != null) TryPickup(rb);
             }
             else
@@ -124,5 +139,19 @@ public class PlayerInteraction : MonoBehaviour
         heldRb = null;
         heldX = 0f;
         heldY = 0f;
+    }
+
+    void setCrosshairActive(bool defaultActive)
+    {
+        if (defaultActive == true)
+        {
+            crosshairImageDefault.SetActive(true);
+            crosshairImagePickup.SetActive(false);
+        }
+        else
+        {
+            crosshairImageDefault.SetActive(false);
+            crosshairImagePickup.SetActive(true);
+        }
     }
 }
