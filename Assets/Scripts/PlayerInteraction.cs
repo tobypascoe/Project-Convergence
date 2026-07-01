@@ -94,6 +94,15 @@ public class PlayerInteraction : MonoBehaviour
                 heldObject.transform.rotation = rotY * rotX * heldObject.transform.rotation;
             }
         }
+
+        // Consume item from hotbar
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (playerInventory.currentHeldItem != null)
+            {
+                playerInventory.Interact();
+            }
+        }
     }
 
     void TryPickup(Rigidbody rb)

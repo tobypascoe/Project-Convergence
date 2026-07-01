@@ -32,7 +32,11 @@ public class PlayerInventory : MonoBehaviour
     private int activeHotbarSlot = 0;
     public Transform hand;
 
-    private GameObject currentHeldItem;
+    public GameObject currentHeldItem;
+
+    public PlayerStats playerStats;
+
+    public Sprite emptyHotbar;
 
     void Update()
     {
@@ -75,6 +79,20 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
+    private void RemoveItem(int index, int amount=1)
+    {
+        inventoryStacks[index] -= amount;
+        if (inventoryStacks[index] == 0)
+        {
+            inventoryID[index] = 0;
+            if (index < 10)
+            {
+                Debug.Log("changing sprite to empty");
+                hotbarComponents[index].hotbarImage.sprite = emptyHotbar;
+            }
+        }
+    }
+
     private void ChangeActiveHotbar()
     {
         if (currentHeldItem != null)
@@ -97,6 +115,16 @@ public class PlayerInventory : MonoBehaviour
         if (hotbarNum < 10)
         {
             hotbarComponents[hotbarNum].count.text = stackNum.ToString();
+        }
+    }
+
+    public void Interact()
+    {
+        WorldItem worldItem = currentHeldItem.GetComponent<WorldItem>();
+
+        if (worldItem.isConsumable)
+        {
+            playerStats.ConsumedItem(worldItem.Consume());
         }
     }
 }

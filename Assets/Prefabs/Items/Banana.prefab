@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9129053245027199999}
-  - component: {fileID: 8111074661318786301}
   - component: {fileID: 5550659148027406945}
+  - component: {fileID: 8111074661318786301}
   m_Layer: 0
   m_Name: Banana
   m_TagString: Item
@@ -34,6 +34,24 @@ Transform:
   - {fileID: 317579218547409423}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5550659148027406945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5318893735102753782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe7b9b8b1c756d44ca3c7c0b6c3bb8b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemID: 2
+  isConsumable: 1
+  effect:
+    health: 10
+    hunger: 10
+    thirst: 20
 --- !u!136 &8111074661318786301
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -57,19 +75,6 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5550659148027406945
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5318893735102753782}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe7b9b8b1c756d44ca3c7c0b6c3bb8b2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemID: 2
 --- !u!1 &8878169865137183978
 GameObject:
   m_ObjectHideFlags: 0

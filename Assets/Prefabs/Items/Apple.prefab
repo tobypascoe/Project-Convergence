@@ -47,6 +47,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemID: 1
+  isConsumable: 1
+  effect:
+    health: 0
+    hunger: 20
+    thirst: 5
 --- !u!135 &526649348068242074
 SphereCollider:
   m_ObjectHideFlags: 0
