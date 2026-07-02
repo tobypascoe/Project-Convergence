@@ -37,9 +37,18 @@ public class PlayerInventory : MonoBehaviour
     public PlayerStats playerStats;
 
     public Sprite emptyHotbar;
+    public GameObject openedInventory;
+    private bool isInventoryOpen = false;
+    private bool isMovingItem = false;
+    public Image movingImage;
 
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            OpenInventory();
+        }
+
         for (int i = 0; i < hotbarComponents.Count; i++)
         {
             if (Input.GetKeyDown(KeyCode.Alpha1 + i))
@@ -47,6 +56,10 @@ public class PlayerInventory : MonoBehaviour
                 activeHotbarSlot = i;
                 ChangeActiveHotbar();
             }
+        }
+        if (isMovingItem)
+        {
+            movingImage.rectTransform.position = Input.mousePosition + new Vector3(20, -20, 0);
         }
     }
 
@@ -59,7 +72,7 @@ public class PlayerInventory : MonoBehaviour
             {
                 inventoryStacks[i]++;
                 Destroy(itemObject);
-                UpdateCountText(inventoryStacks[i], i);
+                UpdateCountText(i);
                 return;
             }
 
@@ -73,7 +86,7 @@ public class PlayerInventory : MonoBehaviour
             if (nextEmpty < 10)
             {
                 hotbarComponents[nextEmpty].hotbarImage.sprite = itemList[itemID-1].itemImage;
-                UpdateCountText(inventoryStacks[nextEmpty], nextEmpty);
+                UpdateCountText(nextEmpty);
             }
             Destroy(itemObject);
         }
@@ -82,12 +95,12 @@ public class PlayerInventory : MonoBehaviour
     private void RemoveItem(int index, int amount=1)
     {
         inventoryStacks[index] -= amount;
+        UpdateCountText(activeHotbarSlot);
         if (inventoryStacks[index] == 0)
         {
             inventoryID[index] = 0;
             if (index < 10)
             {
-                Debug.Log("changing sprite to empty");
                 hotbarComponents[index].hotbarImage.sprite = emptyHotbar;
             }
         }
@@ -110,11 +123,18 @@ public class PlayerInventory : MonoBehaviour
         currentHeldItem = Instantiate(itemList[itemID-1].item, hand);
     }
 
-    private void UpdateCountText(int stackNum, int hotbarNum)
+    private void UpdateCountText(int index)
     {
-        if (hotbarNum < 10)
+        if (index < 10)
         {
-            hotbarComponents[hotbarNum].count.text = stackNum.ToString();
+            if (inventoryStacks[index] == 0)
+            {
+                hotbarComponents[index].count.text = "";
+            }
+            else
+            {
+                hotbarComponents[index].count.text = inventoryStacks[index].ToString();
+            }
         }
     }
 
@@ -125,6 +145,39 @@ public class PlayerInventory : MonoBehaviour
         if (worldItem.isConsumable)
         {
             playerStats.ConsumedItem(worldItem.Consume());
+            RemoveItem(activeHotbarSlot);
+            if (inventoryStacks[activeHotbarSlot] == 0)
+            {
+                Destroy(currentHeldItem);
+            }
         }
+    }
+
+    private void OpenInventory()
+    {
+        if (!isInventoryOpen)
+        {
+            openedInventory.SetActive(true);
+            isInventoryOpen = true;
+        }
+        else
+        {
+            openedInventory.SetActive(false);
+            isInventoryOpen = false;
+        }
+        
+    }
+
+    public void CellClicked(int index)
+    {
+        if (!isMovingItem)
+        {
+            
+        }
+        else
+        {
+
+        }
+        
     }
 }
