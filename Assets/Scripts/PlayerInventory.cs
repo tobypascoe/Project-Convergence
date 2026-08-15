@@ -21,13 +21,21 @@ public class hotbarComponent
     public TextMeshProUGUI count;
 }
 
+[System.Serializable]
+public class inventoryComponent
+{
+    public Image inventoryImage;
+    public TextMeshProUGUI count;
+}
+
 public class PlayerInventory : MonoBehaviour
 {
-    private List<int> inventoryID = new List<int>(new int[30]);
-    private List<int> inventoryStacks = new List<int>(new int[30]);
+    private List<int> inventoryID = new List<int>(new int[40]);
+    private List<int> inventoryStacks = new List<int>(new int[40]);
 
     public List<itemID> itemList;
     public List<hotbarComponent> hotbarComponents;
+    public List<inventoryComponent> inventoryComponents;
 
     private int activeHotbarSlot = 0;
     public Transform hand;
@@ -35,12 +43,15 @@ public class PlayerInventory : MonoBehaviour
     public GameObject currentHeldItem;
 
     public PlayerStats playerStats;
+    public PlayerMovement playerMovement;
 
     public Sprite emptyHotbar;
     public GameObject openedInventory;
     private bool isInventoryOpen = false;
     private bool isMovingItem = false;
+    private int movingItemID;
     public Image movingImage;
+    private int movingStack = 0;
 
     void Update()
     {
@@ -87,6 +98,10 @@ public class PlayerInventory : MonoBehaviour
             {
                 hotbarComponents[nextEmpty].hotbarImage.sprite = itemList[itemID-1].itemImage;
                 UpdateCountText(nextEmpty);
+            } 
+            else
+            {
+                inventoryComponents[nextEmpty-10].inventoryImage.sprite = itemList[itemID - 1].itemImage;
             }
             Destroy(itemObject);
         }
@@ -114,7 +129,6 @@ public class PlayerInventory : MonoBehaviour
         }
 
         int itemID = inventoryID[activeHotbarSlot];
-        Debug.Log(itemID-1);
 
         if (itemID == 0)
         {
@@ -157,11 +171,17 @@ public class PlayerInventory : MonoBehaviour
     {
         if (!isInventoryOpen)
         {
+            playerMovement.InInventory(true);
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
             openedInventory.SetActive(true);
             isInventoryOpen = true;
         }
         else
         {
+            playerMovement.InInventory(false);
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
             openedInventory.SetActive(false);
             isInventoryOpen = false;
         }
@@ -172,11 +192,29 @@ public class PlayerInventory : MonoBehaviour
     {
         if (!isMovingItem)
         {
-            
+            if (inventoryStacks[index] != 0)
+            {
+                isMovingItem = true;
+                movingItemID = inventoryID[index];
+                movingStack = inventoryStacks[index];
+                inventoryID[index] = 0;
+                inventoryComponents[index-10].inventoryImage.sprite = emptyHotbar;
+                movingImage.sprite = itemList[movingItemID-1].itemImage;
+                movingImage.gameObject.SetActive(true);
+            }
         }
         else
         {
-
+            if (inventoryID[index] == 0)
+            {
+                inventoryComponents[index-10].inventoryImage.sprite = itemList[movingItemID-1].itemImage;
+                inventoryID[index] = movingItemID;
+                inventoryStacks[index] = movingStack;
+                movingItemID = 0;
+                movingStack = 0;
+                isMovingItem = false;
+                movingImage.gameObject.SetActive(false);
+            }
         }
         
     }

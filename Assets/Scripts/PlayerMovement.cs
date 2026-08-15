@@ -19,6 +19,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 velocity;
     private Vector3 airVelocity;
     private float maxAirSpeed = 0.6f;
+    private bool inInventory = false;
 
     public CinemachineCamera cinemachineCam;
 
@@ -87,7 +88,7 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // --- Rotate player ---
-        if (cameraTarget != null && !isInspecting)
+        if (cameraTarget != null && !isInspecting && !inInventory)
         {
             float targetYaw = cameraTarget.eulerAngles.y;
             transform.rotation = Quaternion.Euler(0f, targetYaw, 0f);
@@ -97,4 +98,10 @@ public class PlayerMovement : MonoBehaviour
         else
             inputProvider.enabled = false;
     }
+
+    public void InInventory(bool state)
+    {
+        inInventory = state;
+    }
+
 }
