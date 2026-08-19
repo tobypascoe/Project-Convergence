@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 
 [System.Serializable]
-public class itemID
+public class ItemID
 {
     public string itemName;
     public int idNum;
@@ -15,27 +15,34 @@ public class itemID
 }
 
 [System.Serializable]
-public class hotbarComponent
+public class HotbarComponent
 {
     public Image hotbarImage;
     public TextMeshProUGUI count;
 }
 
 [System.Serializable]
-public class inventoryComponent
+public class InventoryComponent
 {
     public Image inventoryImage;
     public TextMeshProUGUI count;
 }
 
+public class InventoryArray
+{
+    public int ID;
+    public int stack;
+}
+
 public class PlayerInventory : MonoBehaviour
 {
-    private List<int> inventoryID = new List<int>(new int[40]);
     private List<int> inventoryStacks = new List<int>(new int[40]);
 
-    public List<itemID> itemList;
-    public List<hotbarComponent> hotbarComponents;
-    public List<inventoryComponent> inventoryComponents;
+    private InventoryArray[] inventory = new InventoryArray[40];
+
+    public List<ItemID> itemList;
+    public List<HotbarComponent> hotbarComponents;
+    public List<InventoryComponent> inventoryComponents;
 
     private int activeHotbarSlot = 0;
     public Transform hand;
@@ -51,7 +58,19 @@ public class PlayerInventory : MonoBehaviour
     private bool isMovingItem = false;
     private int movingItemID;
     public Image movingImage;
+    public RectTransform movingIcon;
     private int movingStack = 0;
+    public TextMeshProUGUI movingCount;
+
+    void Start()
+    {
+        for (int i = 0; i < 40; i++)
+        {
+            inventory[i] = new InventoryArray();
+            inventory[i].ID = 0;
+            inventory[i].stack = 0;
+        }
+    }
 
     void Update()
     {
@@ -70,30 +89,30 @@ public class PlayerInventory : MonoBehaviour
         }
         if (isMovingItem)
         {
-            movingImage.rectTransform.position = Input.mousePosition + new Vector3(20, -20, 0);
+            movingIcon.position = Input.mousePosition + new Vector3(20, -20, 0);
         }
     }
 
     public void AddItem(int itemID, GameObject itemObject)
     {
         int nextEmpty = -1;
-        for (int i = 0; i < inventoryID.Count; i++)
+        for (int i = 0; i < 40; i++)
         {
-            if (inventoryID[i] == itemID && inventoryStacks[i] < itemList[itemID-1].maxStack)
+            if (inventory[i].ID == itemID && inventory[i].stack < itemList[itemID-1].maxStack)
             {
-                inventoryStacks[i]++;
+                inventory[i].stack++;
                 Destroy(itemObject);
                 UpdateCountText(i);
                 return;
             }
 
-            if (inventoryID[i] == 0 && nextEmpty == -1) nextEmpty = i;
+            if (inventory[i].ID == 0 && nextEmpty == -1) nextEmpty = i;
         }
         
-        if (nextEmpty != -1 && inventoryStacks[nextEmpty] < itemList[itemID-1].maxStack)
+        if (nextEmpty != -1 && inventory[nextEmpty].stack < itemList[itemID-1].maxStack)
         {
-            inventoryID[nextEmpty] = itemID;
-            inventoryStacks[nextEmpty]++;
+            inventory[nextEmpty].ID = itemID;
+            inventory[nextEmpty].stack++;
             if (nextEmpty < 10)
             {
                 hotbarComponents[nextEmpty].hotbarImage.sprite = itemList[itemID-1].itemImage;
@@ -109,11 +128,11 @@ public class PlayerInventory : MonoBehaviour
 
     private void RemoveItem(int index, int amount=1)
     {
-        inventoryStacks[index] -= amount;
+        inventory[index].stack -= amount;
         UpdateCountText(activeHotbarSlot);
-        if (inventoryStacks[index] == 0)
+        if (inventory[index].stack == 0)
         {
-            inventoryID[index] = 0;
+            inventory[index].ID = 0;
             if (index < 10)
             {
                 hotbarComponents[index].hotbarImage.sprite = emptyHotbar;
@@ -128,7 +147,7 @@ public class PlayerInventory : MonoBehaviour
             Destroy(currentHeldItem);
         }
 
-        int itemID = inventoryID[activeHotbarSlot];
+        int itemID = inventory[activeHotbarSlot].ID;
 
         if (itemID == 0)
         {
@@ -141,13 +160,13 @@ public class PlayerInventory : MonoBehaviour
     {
         if (index < 10)
         {
-            if (inventoryStacks[index] == 0)
+            if (inventory[index].stack == 0)
             {
                 hotbarComponents[index].count.text = "";
             }
             else
             {
-                hotbarComponents[index].count.text = inventoryStacks[index].ToString();
+                hotbarComponents[index].count.text = inventory[index].stack.ToString();
             }
         }
     }
@@ -160,7 +179,7 @@ public class PlayerInventory : MonoBehaviour
         {
             playerStats.ConsumedItem(worldItem.Consume());
             RemoveItem(activeHotbarSlot);
-            if (inventoryStacks[activeHotbarSlot] == 0)
+            if (inventory[activeHotbarSlot].stack == 0)
             {
                 Destroy(currentHeldItem);
             }
@@ -192,30 +211,68 @@ public class PlayerInventory : MonoBehaviour
     {
         if (!isMovingItem)
         {
-            if (inventoryStacks[index] != 0)
+            if (inventory[index].stack > 0)
             {
                 isMovingItem = true;
-                movingItemID = inventoryID[index];
-                movingStack = inventoryStacks[index];
-                inventoryID[index] = 0;
-                inventoryComponents[index-10].inventoryImage.sprite = emptyHotbar;
+                movingItemID = inventory[index].ID;
+                movingStack = inventory[index].stack;
+                movingCount.text = movingStack.ToString();
+                inventory[index].ID = 0;
+                inventory[index].stack = 0;
+
+                if (index > 10) inventoryComponents[index - 10].inventoryImage.sprite = emptyHotbar;
+                else
+                {
+                    hotbarComponents[index].hotbarImage.sprite = emptyHotbar;
+                    UpdateCountText(index);
+                }
+                    
                 movingImage.sprite = itemList[movingItemID-1].itemImage;
-                movingImage.gameObject.SetActive(true);
+                movingIcon.gameObject.SetActive(true);
             }
         }
         else
         {
-            if (inventoryID[index] == 0)
+            if (inventory[index].ID == 0)
             {
-                inventoryComponents[index-10].inventoryImage.sprite = itemList[movingItemID-1].itemImage;
-                inventoryID[index] = movingItemID;
-                inventoryStacks[index] = movingStack;
-                movingItemID = 0;
-                movingStack = 0;
-                isMovingItem = false;
-                movingImage.gameObject.SetActive(false);
+                inventory[index].ID = movingItemID;
+                inventory[index].stack = movingStack;
+
+                if (index > 10) inventoryComponents[index-10].inventoryImage.sprite = itemList[movingItemID-1].itemImage;
+                else
+                {
+                    hotbarComponents[index].hotbarImage.sprite = itemList[movingItemID - 1].itemImage;
+                    UpdateCountText(index);
+                }
+                resetMove();
+            }
+            else if (inventory[index].ID == movingItemID)
+            {
+                if (inventory[index].stack < itemList[movingItemID - 1].maxStack)
+                {
+                    if (inventory[index].stack + movingStack < itemList[movingItemID].maxStack)
+                    {
+                        inventory[index].stack += movingStack;
+                        UpdateCountText(index);
+                        resetMove();
+                    }
+                    else
+                    {
+                        int diff = itemList[movingItemID].maxStack - inventory[index].stack;
+                        inventory[index].stack += diff;
+                        UpdateCountText(index);
+                        movingStack -= diff;
+                    }
+                }
             }
         }
-        
+    }
+
+    void resetMove()
+    {
+        movingItemID = 0;
+        movingStack = 0;
+        isMovingItem = false;
+        movingIcon.gameObject.SetActive(false);
     }
 }
