@@ -169,6 +169,17 @@ public class PlayerInventory : MonoBehaviour
                 hotbarComponents[index].count.text = inventory[index].stack.ToString();
             }
         }
+        else
+        {
+            if (inventory[index].stack == 0)
+            {
+                inventoryComponents[index - 10].count.text = "";
+            }
+            else
+            {
+                inventoryComponents[index - 10].count.text = inventory[index].stack.ToString();
+            }
+        }
     }
 
     public void Interact()
@@ -211,7 +222,7 @@ public class PlayerInventory : MonoBehaviour
     {
         if (!isMovingItem)
         {
-            if (inventory[index].stack > 0)
+            if (inventory[index].stack > 0) // picking up item
             {
                 isMovingItem = true;
                 movingItemID = inventory[index].ID;
@@ -220,7 +231,12 @@ public class PlayerInventory : MonoBehaviour
                 inventory[index].ID = 0;
                 inventory[index].stack = 0;
 
-                if (index > 10) inventoryComponents[index - 10].inventoryImage.sprite = emptyHotbar;
+                if (index >= 10)
+                {
+                    inventoryComponents[index - 10].inventoryImage.sprite = emptyHotbar;
+                    UpdateCountText(index);
+                }
+
                 else
                 {
                     hotbarComponents[index].hotbarImage.sprite = emptyHotbar;
@@ -233,12 +249,16 @@ public class PlayerInventory : MonoBehaviour
         }
         else
         {
-            if (inventory[index].ID == 0)
+            if (inventory[index].ID == 0) // moving to empty slot
             {
                 inventory[index].ID = movingItemID;
                 inventory[index].stack = movingStack;
 
-                if (index > 10) inventoryComponents[index-10].inventoryImage.sprite = itemList[movingItemID-1].itemImage;
+                if (index >= 10)
+                {
+                    inventoryComponents[index - 10].inventoryImage.sprite = itemList[movingItemID - 1].itemImage;
+                    UpdateCountText(index);
+                }
                 else
                 {
                     hotbarComponents[index].hotbarImage.sprite = itemList[movingItemID - 1].itemImage;
@@ -246,22 +266,24 @@ public class PlayerInventory : MonoBehaviour
                 }
                 resetMove();
             }
-            else if (inventory[index].ID == movingItemID)
+            else if (inventory[index].ID == movingItemID) // moving to slot with same item
             {
-                if (inventory[index].stack < itemList[movingItemID - 1].maxStack)
+                if (inventory[index].stack < itemList[movingItemID - 1].maxStack) 
                 {
-                    if (inventory[index].stack + movingStack < itemList[movingItemID].maxStack)
+                    if (inventory[index].stack + movingStack < itemList[movingItemID-1].maxStack) // add all of moving item to slot
                     {
                         inventory[index].stack += movingStack;
+                        movingCount.text = movingStack.ToString();
                         UpdateCountText(index);
                         resetMove();
                     }
-                    else
-                    {
-                        int diff = itemList[movingItemID].maxStack - inventory[index].stack;
+                    else // add as much of moving item to slot as possible
+                    { 
+                        int diff = itemList[movingItemID-1].maxStack - inventory[index].stack;
                         inventory[index].stack += diff;
                         UpdateCountText(index);
                         movingStack -= diff;
+                        movingCount.text = movingStack.ToString();
                     }
                 }
             }
