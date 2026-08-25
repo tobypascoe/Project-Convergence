@@ -45,6 +45,8 @@ public class PlayerInventory : MonoBehaviour
     public List<InventoryComponent> inventoryComponents;
 
     private int activeHotbarSlot = 0;
+    public int currHotbar => activeHotbarSlot;
+
     public Transform hand;
 
     public GameObject currentHeldItem;
@@ -126,7 +128,7 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    private void RemoveItem(int index, int amount=1)
+    public void RemoveItem(int index, int amount=1)
     {
         inventory[index].stack -= amount;
         UpdateCountText(activeHotbarSlot);
@@ -184,12 +186,11 @@ public class PlayerInventory : MonoBehaviour
 
     public void Interact()
     {
-        WorldItem worldItem = currentHeldItem.GetComponent<WorldItem>();
+        IInteractable interactable = currentHeldItem.GetComponent<IInteractable>();
 
-        if (worldItem.isConsumable)
+        if (interactable != null)
         {
-            playerStats.ConsumedItem(worldItem.Consume());
-            RemoveItem(activeHotbarSlot);
+            interactable.Interact(this);
             if (inventory[activeHotbarSlot].stack == 0)
             {
                 Destroy(currentHeldItem);

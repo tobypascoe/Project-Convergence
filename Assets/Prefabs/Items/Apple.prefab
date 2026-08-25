@@ -9,8 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3403425602845843671}
-  - component: {fileID: 4544653221051625569}
   - component: {fileID: 526649348068242074}
+  - component: {fileID: 4622663571403844650}
+  - component: {fileID: 7072022226831278571}
   m_Layer: 0
   m_Name: Apple
   m_TagString: Item
@@ -34,24 +35,6 @@ Transform:
   - {fileID: 4559720942429286549}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4544653221051625569
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4375060319630958857}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe7b9b8b1c756d44ca3c7c0b6c3bb8b2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  itemID: 1
-  isConsumable: 1
-  effect:
-    health: 0
-    hunger: 20
-    thirst: 5
 --- !u!135 &526649348068242074
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -73,6 +56,36 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.55
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4622663571403844650
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4375060319630958857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0a0ddf692c200344ad1dcbdf36961c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  effect:
+    health: 0
+    hunger: 10
+    thirst: 10
+  itemID: 1
+--- !u!114 &7072022226831278571
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4375060319630958857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe7b9b8b1c756d44ca3c7c0b6c3bb8b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  itemID: 1
 --- !u!1 &8738943377439351293
 GameObject:
   m_ObjectHideFlags: 0
