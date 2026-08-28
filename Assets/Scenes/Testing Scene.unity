@@ -8092,6 +8092,7 @@ GameObject:
   - component: {fileID: 1019354238}
   - component: {fileID: 1019354242}
   - component: {fileID: 1019354243}
+  - component: {fileID: 1019354244}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -8113,12 +8114,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   holdPoint: {fileID: 1549724201}
   pickupRange: 3
-  throwForce: 5
-  rotationSpeed: 1000
   crosshairImageDefault: {fileID: 592813808}
   crosshairImagePickup: {fileID: 1231148805}
   playerInventory: {fileID: 1019354242}
-  player: {fileID: 1019354241}
+  deploying: {fileID: 1019354244}
 --- !u!114 &1019354239
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8207,6 +8206,11 @@ MonoBehaviour:
     idNum: 2
     item: {fileID: 5318893735102753782, guid: 03d8dee054b2b4040a8a4a462931b8c1, type: 3}
     maxStack: 3
+    itemImage: {fileID: 21300000, guid: f73420410a31a804babd91800fe61e47, type: 3}
+  - itemName: Crafting Station
+    idNum: 3
+    item: {fileID: 2220490914220202844, guid: 5906cb3ff387c7444ab89f93a6f2bf9a, type: 3}
+    maxStack: 1
     itemImage: {fileID: 21300000, guid: f73420410a31a804babd91800fe61e47, type: 3}
   hotbarComponents:
   - hotbarImage: {fileID: 278434364}
@@ -8299,6 +8303,7 @@ MonoBehaviour:
   movingImage: {fileID: 1611552003}
   movingIcon: {fileID: 294565769}
   movingCount: {fileID: 328919486}
+  deploying: {fileID: 1019354244}
 --- !u!114 &1019354243
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8314,6 +8319,20 @@ MonoBehaviour:
   healthBar: {fileID: 991501841}
   hungerBar: {fileID: 2133404336}
   thirstBar: {fileID: 1212413733}
+--- !u!114 &1019354244
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1019354237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 392ae02c8e142b548a631cadccabe69d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 1019354237}
+  playerInventory: {fileID: 1019354242}
 --- !u!1 &1028057910
 GameObject:
   m_ObjectHideFlags: 0

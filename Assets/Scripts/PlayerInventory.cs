@@ -63,6 +63,7 @@ public class PlayerInventory : MonoBehaviour
     public RectTransform movingIcon;
     private int movingStack = 0;
     public TextMeshProUGUI movingCount;
+    public Deploying deploying;
 
     void Start()
     {
@@ -72,6 +73,7 @@ public class PlayerInventory : MonoBehaviour
             inventory[i].ID = 0;
             inventory[i].stack = 0;
         }
+        AddItem(3);
     }
 
     void Update()
@@ -95,7 +97,7 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    public void AddItem(int itemID, GameObject itemObject)
+    public void AddItem(int itemID)
     {
         int nextEmpty = -1;
         for (int i = 0; i < 40; i++)
@@ -103,7 +105,6 @@ public class PlayerInventory : MonoBehaviour
             if (inventory[i].ID == itemID && inventory[i].stack < itemList[itemID-1].maxStack)
             {
                 inventory[i].stack++;
-                Destroy(itemObject);
                 UpdateCountText(i);
                 return;
             }
@@ -124,7 +125,6 @@ public class PlayerInventory : MonoBehaviour
             {
                 inventoryComponents[nextEmpty-10].inventoryImage.sprite = itemList[itemID - 1].itemImage;
             }
-            Destroy(itemObject);
         }
     }
 
@@ -184,7 +184,7 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    public void Interact()
+    public void Interaction()
     {
         IInteractable interactable = currentHeldItem.GetComponent<IInteractable>();
 
@@ -297,5 +297,15 @@ public class PlayerInventory : MonoBehaviour
         movingStack = 0;
         isMovingItem = false;
         movingIcon.gameObject.SetActive(false);
+    }
+
+    public GameObject GetHeldItem()
+    {
+        return currentHeldItem;
+    }
+
+    public void Deploy()
+    {
+        deploying.StartDeploy();
     }
 }

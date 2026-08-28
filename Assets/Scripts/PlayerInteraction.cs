@@ -6,23 +6,14 @@ public class PlayerInteraction : MonoBehaviour
 {
     public Transform holdPoint;
     public float pickupRange = 3f;
-    public float throwForce = 5f;
-
-    private GameObject heldObject;
-    private Rigidbody heldRb;
-    public float rotationSpeed = 0.01f;
-    private Vector2 rotationInput;
 
     public GameObject crosshairImageDefault;
     public GameObject crosshairImagePickup;
     public PlayerInventory playerInventory;
+    public Deploying deploying;
 
     private float heldX;
     private float heldY;
-
-    public Transform player;
-
-    private Quaternion initialRotation;
 
     void Update()
     {
@@ -57,16 +48,21 @@ public class PlayerInteraction : MonoBehaviour
             if (itemObject != null)
             {
                 int itemID = item.itemID;
-                playerInventory.AddItem(itemID, itemObject);
+                Destroy(itemObject);
+                playerInventory.AddItem(itemID);
             }
         }
 
         // Consume item from hotbar
         if (Input.GetMouseButtonDown(0))
         {
-            if (playerInventory.currentHeldItem != null)
+            Debug.Log("player interaction");
+            if (!deploying.GetIsDeploying())
             {
-                playerInventory.Interact();
+                if (playerInventory.currentHeldItem != null)
+                {
+                    playerInventory.Interaction();
+                }
             }
         }
     }

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Pickup
   - Item
+  - Crafting station
   layers:
   - Default
   - TransparentFX
