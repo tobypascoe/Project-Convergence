@@ -74,6 +74,7 @@ public class PlayerInventory : MonoBehaviour
             inventory[i].stack = 0;
         }
         AddItem(3);
+        AddItem(3);
     }
 
     void Update()
@@ -142,7 +143,7 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    private void ChangeActiveHotbar()
+    public void ChangeActiveHotbar()
     {
         if (currentHeldItem != null)
         {

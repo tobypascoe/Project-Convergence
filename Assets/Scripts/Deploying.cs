@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class Deploying : MonoBehaviour
 {
-    private bool isDeploying;
+    private bool start = false; // enables the ghost
+    private bool isDeploying = false; // enables placing down of item
+    private bool toScale = false;
 
     private GameObject prefab;
     private float placeRange = 5f;
@@ -14,33 +16,85 @@ public class Deploying : MonoBehaviour
 
     private void Update()
     {
-        if (isDeploying)
+        if (!start)
+            return;
+
+        if (!isDeploying)
         {
-            if (Input.GetMouseButtonDown(0))
+            isDeploying = true;
+            return;
+        }
+
+        Ray ray = Camera.main.ScreenPointToRay(
+            new Vector3(Screen.width / 2f, Screen.height / 2f, 0)
+            );
+
+        RaycastHit hit;
+        bool hasHit = Physics.Raycast(ray, out hit, placeRange);
+        UpdatePosition(hit, hasHit);
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            Instantiate(prefab, prefab.transform.position, prefab.transform.rotation);
+            Destroy(prefab);
+            playerInventory.RemoveItem(playerInventory.currHotbar);
+            start = false;
+            isDeploying = false;
+            return;
+        }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            start = false;
+            isDeploying = false;
+            Destroy(prefab);
+            BackInHand();
+        }
+    }
+
+    private void UpdatePosition(RaycastHit hit, bool hasHit)
+    {
+        if (prefab != null)
+        {
+            if (!hasHit)
             {
-                Instantiate(prefab, prefab.transform.position, prefab.transform.rotation);
-                Destroy(prefab);
-                playerInventory.RemoveItem(playerInventory.currHotbar);
-                isDeploying = false;
-                Debug.Log("Changed to false");
-                return;
+                BackInHand();
+                toScale = false;
             }
-            Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0));
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, placeRange))
+            else
             {
                 prefab.transform.position = hit.point;
+                if (!toScale)
+                {
+                    prefab.transform.localScale /= 0.6f;
+                    toScale = true;
+                }
             }
+            return;
         }
+        if (hasHit)
+        {
+            InitPrefab();
+        }
+    }
+    
+    private void BackInHand() // puts the item back in hand if there placing is out of range
+    {
+        Destroy(prefab);
+        playerInventory.ChangeActiveHotbar();
+    }
+
+    private void InitPrefab()
+    {
+        prefab = playerInventory.GetHeldItem();
+        prefab.GetComponent<Collider>().enabled = false;
+        prefab.transform.position = player.transform.position + distanceInFront;
     }
 
     public void StartDeploy()
     {
-        isDeploying = true;
-        Debug.Log("Starting new deploy");
-        prefab = playerInventory.GetHeldItem();
-        prefab.GetComponent<Collider>().enabled = false;
-        prefab.transform.position = player.transform.position + distanceInFront;
+        start = true;
+        InitPrefab();
     }
 
     public bool GetIsDeploying()
