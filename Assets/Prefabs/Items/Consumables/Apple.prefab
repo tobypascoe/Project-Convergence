@@ -72,7 +72,6 @@ MonoBehaviour:
     health: 0
     hunger: 10
     thirst: 10
-  itemID: 1
 --- !u!114 &7072022226831278571
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -85,7 +84,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe7b9b8b1c756d44ca3c7c0b6c3bb8b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemID: 1
+  data: {fileID: 11400000, guid: e6ff7997579820e468a07e421c23fb47, type: 2}
 --- !u!1 &8738943377439351293
 GameObject:
   m_ObjectHideFlags: 0

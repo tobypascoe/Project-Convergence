@@ -17,7 +17,13 @@ public class Deploying : MonoBehaviour
     private void Update()
     {
         if (!start)
+        {
             return;
+        }
+        else if(prefab == null && playerInventory.currentHeldItem == null)
+        {
+            start = false;
+        }
 
         if (!isDeploying)
         {
@@ -34,22 +40,10 @@ public class Deploying : MonoBehaviour
         UpdatePosition(hit, hasHit);
 
         if (Input.GetMouseButtonDown(0))
-        {
-            Instantiate(prefab, prefab.transform.position, prefab.transform.rotation);
-            Destroy(prefab);
-            playerInventory.RemoveItem(playerInventory.currHotbar);
-            start = false;
-            isDeploying = false;
-            return;
-        }
+            PlaceObject();
 
         if (Input.GetMouseButtonDown(1))
-        {
-            start = false;
-            isDeploying = false;
-            Destroy(prefab);
-            BackInHand();
-        }
+            CancelPlacement();
     }
 
     private void UpdatePosition(RaycastHit hit, bool hasHit)
@@ -77,6 +71,25 @@ public class Deploying : MonoBehaviour
             InitPrefab();
         }
     }
+
+    private void PlaceObject()
+    {
+        Instantiate(prefab, prefab.transform.position, prefab.transform.rotation);
+        Destroy(prefab);
+        playerInventory.RemoveItem(playerInventory.currHotbar);
+        start = false;
+        isDeploying = false;
+        toScale = false;
+        return;
+    }
+
+    private void CancelPlacement()
+    {
+        start = false;
+        isDeploying = false;
+        Destroy(prefab);
+        BackInHand();
+    }
     
     private void BackInHand() // puts the item back in hand if there placing is out of range
     {
@@ -95,6 +108,11 @@ public class Deploying : MonoBehaviour
     {
         start = true;
         InitPrefab();
+    }
+
+    public void StopDeploy()
+    {
+        start = false;
     }
 
     public bool GetIsDeploying()

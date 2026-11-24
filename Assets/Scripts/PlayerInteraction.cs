@@ -47,16 +47,14 @@ public class PlayerInteraction : MonoBehaviour
         {
             if (itemObject != null)
             {
-                int itemID = item.itemID;
                 Destroy(itemObject);
-                playerInventory.AddItem(itemID);
+                playerInventory.AddItem(item.data);
             }
         }
 
         // Consume item from hotbar
         if (Input.GetMouseButtonDown(0))
         {
-            Debug.Log("player interaction");
             if (!deploying.GetIsDeploying())
             {
                 if (playerInventory.currentHeldItem != null)

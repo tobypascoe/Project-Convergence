@@ -8298,6 +8298,7 @@ MonoBehaviour:
   currentHeldItem: {fileID: 0}
   playerStats: {fileID: 1019354243}
   playerMovement: {fileID: 1019354239}
+  itemDB: {fileID: 11400000, guid: 1b95dca100ad2e34fb3caa5d8c8b3d5f, type: 2}
   emptyHotbar: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
   openedInventory: {fileID: 697898876}
   movingImage: {fileID: 1611552003}

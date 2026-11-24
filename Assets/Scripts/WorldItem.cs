@@ -4,5 +4,5 @@ using UnityEngine;
 
 public class WorldItem : MonoBehaviour
 {
-    public int itemID;
+    public ItemData data;
 }

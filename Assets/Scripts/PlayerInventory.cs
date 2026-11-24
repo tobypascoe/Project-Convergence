@@ -30,7 +30,7 @@ public class InventoryComponent
 
 public class InventoryArray
 {
-    public int ID;
+    public ItemData data;
     public int stack;
 }
 
@@ -53,6 +53,7 @@ public class PlayerInventory : MonoBehaviour
 
     public PlayerStats playerStats;
     public PlayerMovement playerMovement;
+    public ItemDatabase itemDB;
 
     public Sprite emptyHotbar;
     public GameObject openedInventory;
@@ -65,16 +66,20 @@ public class PlayerInventory : MonoBehaviour
     public TextMeshProUGUI movingCount;
     public Deploying deploying;
 
-    void Start()
+    void Awake()
     {
         for (int i = 0; i < 40; i++)
         {
             inventory[i] = new InventoryArray();
-            inventory[i].ID = 0;
+            inventory[i].data = null;
             inventory[i].stack = 0;
         }
-        AddItem(3);
-        AddItem(3);
+        if (itemDB.GetItem(2) == null)
+        {
+            Debug.Log("youf SADOF");
+        }
+        AddItem(itemDB.GetItem(2));
+        AddItem(itemDB.GetItem(2));
     }
 
     void Update()
@@ -98,35 +103,49 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    public void AddItem(int itemID)
+    public void AddItem(ItemData data, int amount=1)
     {
         int nextEmpty = -1;
         for (int i = 0; i < 40; i++)
         {
-            if (inventory[i].ID == itemID && inventory[i].stack < itemList[itemID-1].maxStack)
+            if (inventory[i].data == null) // find the lowest value empty stack
             {
-                inventory[i].stack++;
+                if (nextEmpty == -1)
+                    nextEmpty = i;
+                continue;
+            }
+            else if (inventory[i].data.id == data.id && inventory[i].stack < data.maxStack) // check to find existing stack of same type
+            {
+                inventory[i].stack += amount;
                 UpdateCountText(i);
                 return;
             }
-
-            if (inventory[i].ID == 0 && nextEmpty == -1) nextEmpty = i;
         }
-        
-        if (nextEmpty != -1 && inventory[nextEmpty].stack < itemList[itemID-1].maxStack)
+
+        if (nextEmpty > -1)
         {
-            inventory[nextEmpty].ID = itemID;
+            inventory[nextEmpty].data = data;
             inventory[nextEmpty].stack++;
             if (nextEmpty < 10)
             {
-                hotbarComponents[nextEmpty].hotbarImage.sprite = itemList[itemID-1].itemImage;
+                if (data == null)
+                {
+                    Debug.Log("data null");
+                }
+                else if (data.image == null)
+                {
+                    Debug.Log("data image null");
+                }
+                hotbarComponents[nextEmpty].hotbarImage.sprite = data.image;
                 UpdateCountText(nextEmpty);
-            } 
+            }
             else
             {
-                inventoryComponents[nextEmpty-10].inventoryImage.sprite = itemList[itemID - 1].itemImage;
+                inventoryComponents[nextEmpty - 10].inventoryImage.sprite = data.image;
             }
         }
+        else
+            Debug.Log("Inventory full");
     }
 
     public void RemoveItem(int index, int amount=1)
@@ -135,7 +154,7 @@ public class PlayerInventory : MonoBehaviour
         UpdateCountText(activeHotbarSlot);
         if (inventory[index].stack == 0)
         {
-            inventory[index].ID = 0;
+            inventory[index].data = null;
             if (index < 10)
             {
                 hotbarComponents[index].hotbarImage.sprite = emptyHotbar;
@@ -150,13 +169,13 @@ public class PlayerInventory : MonoBehaviour
             Destroy(currentHeldItem);
         }
 
-        int itemID = inventory[activeHotbarSlot].ID;
+        int itemID = inventory[activeHotbarSlot].data.id;
 
         if (itemID == 0)
         {
             return;
         }
-        currentHeldItem = Instantiate(itemList[itemID-1].item, hand);
+        currentHeldItem = Instantiate(itemDB.GetItem(itemID).prefab, hand);
     }
 
     private void UpdateCountText(int index)
@@ -222,15 +241,18 @@ public class PlayerInventory : MonoBehaviour
 
     public void CellClicked(int index)
     {
+
+        ItemData movingItem = itemDB.GetItem(movingItemID);
+
         if (!isMovingItem)
         {
             if (inventory[index].stack > 0) // picking up item
             {
                 isMovingItem = true;
-                movingItemID = inventory[index].ID;
+                movingItemID = inventory[index].data.id;
                 movingStack = inventory[index].stack;
                 movingCount.text = movingStack.ToString();
-                inventory[index].ID = 0;
+                inventory[index].data.id = 0;
                 inventory[index].stack = 0;
 
                 if (index >= 10)
@@ -238,41 +260,40 @@ public class PlayerInventory : MonoBehaviour
                     inventoryComponents[index - 10].inventoryImage.sprite = emptyHotbar;
                     UpdateCountText(index);
                 }
-
                 else
                 {
                     hotbarComponents[index].hotbarImage.sprite = emptyHotbar;
                     UpdateCountText(index);
                 }
                     
-                movingImage.sprite = itemList[movingItemID-1].itemImage;
+                movingImage.sprite = movingItem.image;
                 movingIcon.gameObject.SetActive(true);
             }
         }
         else
         {
-            if (inventory[index].ID == 0) // moving to empty slot
+            if (inventory[index].data.id == 0) // moving to empty slot
             {
-                inventory[index].ID = movingItemID;
+                inventory[index].data.id = movingItemID;
                 inventory[index].stack = movingStack;
 
                 if (index >= 10)
                 {
-                    inventoryComponents[index - 10].inventoryImage.sprite = itemList[movingItemID - 1].itemImage;
+                    inventoryComponents[index - 10].inventoryImage.sprite = movingItem.image;
                     UpdateCountText(index);
                 }
                 else
                 {
-                    hotbarComponents[index].hotbarImage.sprite = itemList[movingItemID - 1].itemImage;
+                    hotbarComponents[index].hotbarImage.sprite = movingItem.image;
                     UpdateCountText(index);
                 }
                 resetMove();
             }
-            else if (inventory[index].ID == movingItemID) // moving to slot with same item
+            else if (inventory[index].data.id == movingItemID) // moving to slot with same item
             {
-                if (inventory[index].stack < itemList[movingItemID - 1].maxStack) 
+                if (inventory[index].stack < movingItem.maxStack) 
                 {
-                    if (inventory[index].stack + movingStack < itemList[movingItemID-1].maxStack) // add all of moving item to slot
+                    if (inventory[index].stack + movingStack < movingItem.maxStack) // add all of moving item to slot
                     {
                         inventory[index].stack += movingStack;
                         movingCount.text = movingStack.ToString();
@@ -281,7 +302,7 @@ public class PlayerInventory : MonoBehaviour
                     }
                     else // add as much of moving item to slot as possible
                     { 
-                        int diff = itemList[movingItemID-1].maxStack - inventory[index].stack;
+                        int diff = itemDB.GetItem(movingItemID).maxStack - inventory[index].stack;
                         inventory[index].stack += diff;
                         UpdateCountText(index);
                         movingStack -= diff;
