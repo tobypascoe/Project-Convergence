@@ -8,4 +8,5 @@ public class ItemData : ScriptableObject
     public GameObject prefab;
     public int maxStack;
     public Sprite image;
+    public Vector3 handScale;
 }

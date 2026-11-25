@@ -55,7 +55,7 @@ public class PlayerInteraction : MonoBehaviour
         // Consume item from hotbar
         if (Input.GetMouseButtonDown(0))
         {
-            if (!deploying.GetIsDeploying())
+            if (!deploying.GetIsDeploying() && !playerInventory.isMovingItem)
             {
                 if (playerInventory.currentHeldItem != null)
                 {

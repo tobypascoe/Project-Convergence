@@ -40,7 +40,6 @@ public class PlayerInventory : MonoBehaviour
 
     private InventoryArray[] inventory = new InventoryArray[40];
 
-    public List<ItemID> itemList;
     public List<HotbarComponent> hotbarComponents;
     public List<InventoryComponent> inventoryComponents;
 
@@ -58,8 +57,8 @@ public class PlayerInventory : MonoBehaviour
     public Sprite emptyHotbar;
     public GameObject openedInventory;
     private bool isInventoryOpen = false;
-    private bool isMovingItem = false;
-    private int movingItemID;
+    public bool isMovingItem = false;
+    private ItemData movingData;
     public Image movingImage;
     public RectTransform movingIcon;
     private int movingStack = 0;
@@ -73,10 +72,6 @@ public class PlayerInventory : MonoBehaviour
             inventory[i] = new InventoryArray();
             inventory[i].data = null;
             inventory[i].stack = 0;
-        }
-        if (itemDB.GetItem(2) == null)
-        {
-            Debug.Log("youf SADOF");
         }
         AddItem(itemDB.GetItem(2));
         AddItem(itemDB.GetItem(2));
@@ -122,20 +117,12 @@ public class PlayerInventory : MonoBehaviour
             }
         }
 
-        if (nextEmpty > -1)
+        if (nextEmpty > -1) // no existing stack, so add to next empty stack
         {
             inventory[nextEmpty].data = data;
             inventory[nextEmpty].stack++;
             if (nextEmpty < 10)
             {
-                if (data == null)
-                {
-                    Debug.Log("data null");
-                }
-                else if (data.image == null)
-                {
-                    Debug.Log("data image null");
-                }
                 hotbarComponents[nextEmpty].hotbarImage.sprite = data.image;
                 UpdateCountText(nextEmpty);
             }
@@ -169,13 +156,12 @@ public class PlayerInventory : MonoBehaviour
             Destroy(currentHeldItem);
         }
 
-        int itemID = inventory[activeHotbarSlot].data.id;
-
-        if (itemID == 0)
+        if (inventory[activeHotbarSlot].data == null)
         {
             return;
         }
-        currentHeldItem = Instantiate(itemDB.GetItem(itemID).prefab, hand);
+        currentHeldItem = Instantiate(itemDB.GetItem(inventory[activeHotbarSlot].data.id).prefab, hand);
+        currentHeldItem.transform.localScale = inventory[activeHotbarSlot].data.handScale;
     }
 
     private void UpdateCountText(int index)
@@ -208,11 +194,13 @@ public class PlayerInventory : MonoBehaviour
     {
         IInteractable interactable = currentHeldItem.GetComponent<IInteractable>();
 
-        if (interactable != null)
+        if (interactable != null && !isInventoryOpen)
         {
             interactable.Interact(this);
-            if (inventory[activeHotbarSlot].stack == 0)
+            Debug.Log("interacting");
+            if (inventory[activeHotbarSlot].stack <= 0)
             {
+                Debug.Log("destroying");
                 Destroy(currentHeldItem);
             }
         }
@@ -241,18 +229,15 @@ public class PlayerInventory : MonoBehaviour
 
     public void CellClicked(int index)
     {
-
-        ItemData movingItem = itemDB.GetItem(movingItemID);
-
         if (!isMovingItem)
         {
             if (inventory[index].stack > 0) // picking up item
             {
                 isMovingItem = true;
-                movingItemID = inventory[index].data.id;
+                movingData = inventory[index].data;
                 movingStack = inventory[index].stack;
                 movingCount.text = movingStack.ToString();
-                inventory[index].data.id = 0;
+                inventory[index].data = null;
                 inventory[index].stack = 0;
 
                 if (index >= 10)
@@ -266,34 +251,34 @@ public class PlayerInventory : MonoBehaviour
                     UpdateCountText(index);
                 }
                     
-                movingImage.sprite = movingItem.image;
+                movingImage.sprite = movingData.image;
                 movingIcon.gameObject.SetActive(true);
             }
         }
         else
         {
-            if (inventory[index].data.id == 0) // moving to empty slot
+            if (inventory[index].data == null) // moving to empty slot
             {
-                inventory[index].data.id = movingItemID;
+                inventory[index].data = movingData;
                 inventory[index].stack = movingStack;
 
                 if (index >= 10)
                 {
-                    inventoryComponents[index - 10].inventoryImage.sprite = movingItem.image;
+                    inventoryComponents[index - 10].inventoryImage.sprite = movingData.image;
                     UpdateCountText(index);
                 }
                 else
                 {
-                    hotbarComponents[index].hotbarImage.sprite = movingItem.image;
+                    hotbarComponents[index].hotbarImage.sprite = movingData.image;
                     UpdateCountText(index);
                 }
                 resetMove();
             }
-            else if (inventory[index].data.id == movingItemID) // moving to slot with same item
+            else if (inventory[index].data.id == movingData.id) // moving to slot with same item
             {
-                if (inventory[index].stack < movingItem.maxStack) 
+                if (inventory[index].stack < movingData.maxStack) 
                 {
-                    if (inventory[index].stack + movingStack < movingItem.maxStack) // add all of moving item to slot
+                    if (inventory[index].stack + movingStack < movingData.maxStack) // add all of moving item to slot
                     {
                         inventory[index].stack += movingStack;
                         movingCount.text = movingStack.ToString();
@@ -302,7 +287,7 @@ public class PlayerInventory : MonoBehaviour
                     }
                     else // add as much of moving item to slot as possible
                     { 
-                        int diff = itemDB.GetItem(movingItemID).maxStack - inventory[index].stack;
+                        int diff = itemDB.GetItem(movingData.id).maxStack - inventory[index].stack;
                         inventory[index].stack += diff;
                         UpdateCountText(index);
                         movingStack -= diff;
@@ -315,7 +300,7 @@ public class PlayerInventory : MonoBehaviour
 
     void resetMove()
     {
-        movingItemID = 0;
+        movingData = null;
         movingStack = 0;
         isMovingItem = false;
         movingIcon.gameObject.SetActive(false);

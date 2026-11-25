@@ -60,7 +60,7 @@ public class Deploying : MonoBehaviour
                 prefab.transform.position = hit.point;
                 if (!toScale)
                 {
-                    prefab.transform.localScale /= 0.6f;
+                    prefab.transform.localScale = new Vector3(1f,  1f, 1f);
                     toScale = true;
                 }
             }
