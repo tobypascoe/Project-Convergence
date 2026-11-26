@@ -15,16 +15,19 @@ public class PlayerMovement : MonoBehaviour
     [Header("Rotation")]
     public float rotationSmoothTime = 0.02f;
 
+    public PlayerInventory playerInventory;
     private CharacterController controller;
-    private Vector3 velocity;
-    private Vector3 airVelocity;
+
+    public CinemachineCamera cinemachineCam;
+    public CinemachineInputAxisController inputProvider;
+
+    private Vector3 currAirVelocity = Vector3.zero;
+
     private float maxAirSpeed = 0.6f;
     private bool inInventory = false;
 
-    public CinemachineCamera cinemachineCam;
-
-    public bool isInspecting = false;
-    public CinemachineInputAxisController inputProvider;
+    public float stamina = 100f;
+    public float staminaLossRate = 5f;
 
     void Start()
     {
@@ -35,8 +38,6 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        isInspecting = Input.GetKey(KeyCode.LeftControl);
-
         if (Input.GetKey(KeyCode.LeftShift))
         {
             speed = 7.5f;
@@ -48,47 +49,32 @@ public class PlayerMovement : MonoBehaviour
             cinemachineCam.Lens.FieldOfView = 60f;
         }
 
-        // --- Movement input ---
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
         Vector3 move = transform.right * x + transform.forward * z;
+
         if (controller.isGrounded)
         {
-            controller.Move(move * speed * Time.deltaTime);
+            if (currAirVelocity.y < 0f)
+            {
+                currAirVelocity.y = -2f;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                currAirVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            }
         }
         else
         {
-            airVelocity = Vector3.ClampMagnitude(airVelocity, maxAirSpeed);
-            controller.Move((airVelocity + (move / 3)) * speed * Time.deltaTime);
+            currAirVelocity.y += gravity * Time.deltaTime;
         }
- 
-        // --- Gravity ---
-        velocity.y += gravity * Time.deltaTime;
 
-        // --- Move vertical ---
+        Vector3 velocity = move * speed + currAirVelocity;
+
         controller.Move(velocity * Time.deltaTime);
-        if ((controller.collisionFlags & CollisionFlags.Above) != 0 && velocity.y > 0)
-        {
-            velocity.y = 0f;
-        }
 
-        // --- Ground check AFTER move ---
-        bool isGrounded = controller.isGrounded;
-
-        if (isGrounded && velocity.y < 0f)
-        {
-            velocity.y = -2f; // important (not 0)
-        }
-
-        // --- Jump ---
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
-        {
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            airVelocity = transform.right * x + transform.forward * z;
-        }
-
-        // --- Rotate player ---
-        if (cameraTarget != null && !isInspecting && !inInventory)
+        if (cameraTarget != null && !playerInventory.isInventoryOpen)
         {
             float targetYaw = cameraTarget.eulerAngles.y;
             transform.rotation = Quaternion.Euler(0f, targetYaw, 0f);
@@ -98,10 +84,4 @@ public class PlayerMovement : MonoBehaviour
         else
             inputProvider.enabled = false;
     }
-
-    public void InInventory(bool state)
-    {
-        inInventory = state;
-    }
-
 }

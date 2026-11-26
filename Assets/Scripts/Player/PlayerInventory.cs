@@ -56,7 +56,7 @@ public class PlayerInventory : MonoBehaviour
 
     public Sprite emptyHotbar;
     public GameObject openedInventory;
-    private bool isInventoryOpen = false;
+    public bool isInventoryOpen = false;
     public bool isMovingItem = false;
     private ItemData movingData;
     public Image movingImage;
@@ -210,7 +210,6 @@ public class PlayerInventory : MonoBehaviour
     {
         if (!isInventoryOpen)
         {
-            playerMovement.InInventory(true);
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
             openedInventory.SetActive(true);
@@ -218,7 +217,6 @@ public class PlayerInventory : MonoBehaviour
         }
         else
         {
-            playerMovement.InInventory(false);
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
             openedInventory.SetActive(false);

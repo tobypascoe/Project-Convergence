@@ -17,3 +17,4 @@ MonoBehaviour:
   prefab: {fileID: 5318893735102753782, guid: 03d8dee054b2b4040a8a4a462931b8c1, type: 3}
   maxStack: 5
   image: {fileID: 21300000, guid: f73420410a31a804babd91800fe61e47, type: 3}
+  handScale: {x: 0.6, y: 0.6, z: 0.6}
